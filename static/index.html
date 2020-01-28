@@ -1,0 +1,161 @@
+<!-- https://leafletjs.com/examples/quick-start/ -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
+		integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+		crossorigin="" />
+
+	<!-- Make sure you put this AFTER Leaflet's CSS -->
+	<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
+		integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
+		crossorigin=""></script>
+
+</head>
+
+
+<style>
+	body, html {
+		width: 100%;
+		height: 100%;
+		margin: 0;
+		padding: 0;
+		color: #000;
+		background-color: rgba(122, 159, 168, 0.787);
+	}
+
+	.leaflet-div-icon {
+		background: transparent;
+		border: none;
+	}
+
+	.leaflet-marker-icon .number {
+		position: relative;
+		top: -37px;
+		font-size: 12px;
+		width: 25px;
+		text-align: center;
+	}
+</style>
+
+
+<body>
+
+	<div style="display: flex; height: 100%; ">
+		<div id="map_div" style="height: 100%; width: 90%;"></div>
+		<div>
+			<center><a href=https://github.com/ogre/spyserver_monitor>SpyServer Monitor</a></center>
+			<div id="TOTAL" style="margin: 20px;"></div>
+			<div id="ACTIVE" style="margin: 20px;"></div>
+			<div style="display: flex;">
+				<div id="countries" style="margin: 20px;"></div>
+				<div id="cities" style="margin: 20px;"></div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+
+		L.NumberedDivIcon = L.Icon.extend({
+			options: {
+				iconUrl: 'static/marker.png',
+				number: '',
+				shadowUrl: null,
+				iconSize: new L.Point(25, 41),
+				iconAnchor: new L.Point(13, 41),
+				popupAnchor: new L.Point(0, -33),
+				className: 'leaflet-div-icon'
+			},
+
+			createIcon: function () {
+				var div = document.createElement('div');
+				var img = this._createImg(this.options['iconUrl']);
+				var numdiv = document.createElement('div');
+				numdiv.setAttribute("class", "number");
+				numdiv.innerHTML = this.options['number'] || '';
+				div.appendChild(img);
+				div.appendChild(numdiv);
+				this._setIconStyles(div, 'icon');
+				return div;
+			},
+
+			createShadow: function () {
+				return null;
+			}
+		});
+
+
+		function initialize_map(i_features) {
+			var map = new L.Map('map_div');
+
+			var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+			var osmAttrib = 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors';
+			var osm = new L.TileLayer(osmUrl, { minZoom: 1, maxZoom: 18, attribution: osmAttrib });
+
+			map.setView(new L.LatLng(20, 10), 3);
+			map.addLayer(osm);
+
+			for (var i in i_features) {
+				L.marker(
+					[i_features[i]['lat'], i_features[i]['lon']]
+					, { icon: new L.NumberedDivIcon({ number: i_features[i]['count'] }) }
+				).addTo(map);
+			}
+		}
+
+
+		function show_stats(i_stats) {
+			document.getElementById('TOTAL').innerHTML = '<h4> TOTAL:  ' + i_stats['TOTAL'] + '</h4>'
+
+			document.getElementById('ACTIVE').innerHTML = '<h4> ACTIVE:  ' + i_stats['ACTIVE']['TOTAL'] + '</h4>'
+
+			var countries_text = "Country:<br>";
+			for(var i in i_stats['country'])
+				countries_text += '<br> ' + i_stats['country'][i][0] + ' ' + i_stats['country'][i][1];
+			document.getElementById('countries').innerHTML = '<h5>' + countries_text + '</h5>'
+
+			var countries_text = "City:<br>";
+			for(var i in i_stats['city'])
+				countries_text += '<br> ' + i_stats['city'][i][0] + ' ' + i_stats['city'][i][1];
+			document.getElementById('cities').innerHTML = '<h5>' + countries_text + '</h5>'
+		}
+
+
+		function INIT() {
+			let xhr_map = new XMLHttpRequest();
+			xhr_map.open('GET', window.location.origin + '/ssmon/api/v1/location');
+			xhr_map.onload = function () {
+				if (xhr_map.status != 200) {
+					alert(`Error ${xhr_map.status}: ${xhr_map.statusText}`); // e.g. 404: Not Found
+				} else {
+					initialize_map(JSON.parse(xhr_map.responseText));
+				}
+			};
+			xhr_map.onerror = function () { alert("Request to HTTP server failed."); };
+			xhr_map.send();
+
+			let xhr_stats = new XMLHttpRequest();
+			xhr_stats.open('GET', window.location.origin + '/ssmon/api/v1/GetConnectionCounts');
+			xhr_stats.onload = function () {
+				if (xhr_stats.status != 200) {
+					alert(`Error ${xhr_stats.status}: ${xhr_stats.statusText}`); // e.g. 404: Not Found
+				} else {
+					show_stats(JSON.parse(xhr_stats.responseText));
+				}
+			};
+			xhr_stats.onerror = function () { alert("Request to HTTP server failed."); };
+			xhr_stats.send();
+		}
+
+
+		document.addEventListener('DOMContentLoaded', INIT, false);
+
+	</script>
+
+</body>
