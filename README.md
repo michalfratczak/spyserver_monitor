@@ -11,6 +11,7 @@ All connections are geolocated with [ipgeolocation.io](https://ipgeolocation.io/
 
 There are also Slack notifications for each Open/Close.
 
+It runs on Ubuntu 18.04 and Armbian 5.7, but should be possible to run on other systems too.
 
 ## Requirements
 - python3
