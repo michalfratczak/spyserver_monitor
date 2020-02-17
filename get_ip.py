@@ -177,7 +177,10 @@ class IPgetter(object):
 
 
 def get_ip_world():
-	return IPgetter().get_externalip()
+	ipw = IPgetter().get_externalip()
+	if ipw != '':
+		return ipw
+	return None
 
 # Very Linux Specific
 def get_ip_local():
@@ -187,10 +190,13 @@ def get_ip_local():
 	data = data[0].split('\n')
 	while '' in data:
 		data.remove('')
-	split_data = data[-1].split()
 
-	ipaddr = split_data[split_data.index('src')+1]
-	return ipaddr
+	if data:
+		split_data = data[-1].split()
+		ipaddr = split_data[split_data.index('src')+1]
+		return ipaddr
+
+	return None
 
 
 if __name__ == '__main__':

@@ -21,8 +21,6 @@ import urllib3
 urllib3.disable_warnings()
 http = urllib3.PoolManager()
 
-from get_ip import get_ip_local, get_ip_world
-
 
 def IpMatch(i_ip, i_regexp):
 	i_regexp = i_regexp.replace('*', '\d+')

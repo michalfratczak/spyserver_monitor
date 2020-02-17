@@ -53,8 +53,19 @@ def cfg(i_cfg_file = None):
 		# format DB/ip_filters
 		ip_filters = res['DB']['ip_filters'].split(',')
 		ip_filters = list( map( str.strip, ip_filters ) )
-		ip_filters = list( map( lambda x: x.replace('ip_local',get_ip_local()), ip_filters) )
-		ip_filters = list( map( lambda x: x.replace('ip_world',get_ip_world()), ip_filters) )
+
+		ipl = None
+		while not ipl:
+			print("Checking local IP")
+			ipl = get_ip_local()
+
+		ipw = None
+		while not ipw:
+			print("Checking world IP")
+			ipw = get_ip_world()
+
+		ip_filters = list( map( lambda x: x.replace('ip_local',ipl), ip_filters) )
+		ip_filters = list( map( lambda x: x.replace('ip_world',ipw), ip_filters) )
 		# check for any new line characters - this indicates missing commas
 		if list(filter( lambda x: '\n' in x, ip_filters )):
 			raise RuntimeError("INI File Error: DB/ip_filters should be comma separated list")
@@ -89,7 +100,7 @@ def cfg(i_cfg_file = None):
 			raise RuntimeError("No IP Geolocation key provided. Update INI file.")
 
 		if res['DB']['ip'].lower() == 'ip_local':
-			res['DB']['ip'] = get_ip_local()
+			res['DB']['ip'] = ipl
 
 		for f in res['SPYSERVER']['cfg_list']:
 			if not os.path.isfile(f):

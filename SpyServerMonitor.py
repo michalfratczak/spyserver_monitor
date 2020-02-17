@@ -22,7 +22,6 @@ http = urllib3.PoolManager()
 from cfg import cfg
 
 from ConnectionsDB import Connection
-from get_ip import get_ip_local, get_ip_world
 from NotifySlack import NotifySlack
 
 
