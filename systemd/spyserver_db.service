@@ -1,15 +1,14 @@
 [Unit]
-Description=SpyServer Monitor HTTP/DB iface
+Description=SpyServer Monitor HTTP iface
 After=network.target
-StartLimitIntervalSec=0[Service]
+StartLimitIntervalSec=0
+
+[Service]
 Type=simple
 Restart=always
 RestartSec=1
 User=mfratczak
-
-[Service]
 ExecStart=/usr/bin/env python3 /home/mfratczak/share/spyserver/spyserver_monitor/HttpInterface.py /home/mfratczak/share/spyserver/spyserver_monitor/user.ini
-User=mfratczak
 
 [Install]
 WantedBy=multi-user.target
